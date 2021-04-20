@@ -21,18 +21,18 @@
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function (data) {
-                var arrSales = [['Month', 'Sales Figure', 'Perc. (%)']];    // Define an array and assign columns for the chart.
+                var arrSales = [['Date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+']];    // Define an array and assign columns for the chart.
 
                 // Loop through each data and populate the array.
                 $.each(data, function (index, value) {
-                    arrSales.push([value.Month, value.Sales_Figure, value.Perc]);
+                    arrSales.push([value.Month, value.g1, value.g2]);
                 });
 
                 // Set chart Options.
                 var options = {
                     chart: {
-                        title: 'Monthly Sales',
-                        subtitle: '-- quantities sold'
+                        title: 'Monthly Cases',
+                        subtitle: '-- grouped by age group'
                     },
                     axes: {
                         x: {
