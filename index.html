@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <div id="chart" style="width:auto; height:300px;"></div> 
+    <div id="chart" style="width:auto; height:600px;"></div> 
 </body>
 
 <script>
@@ -17,23 +17,34 @@
 
     function drawLineChart() {
         $.ajax({
-            url: "data.json",
+            url: "assets/data/data_latest.json",
             dataType: "json",
             type: "GET",
             contentType: "application/json; charset=utf-8",
             success: function (data) {
-                var arrSales = [['Date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+']];    // Define an array and assign columns for the chart.
+                var dataSeries = [['date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+', 'unbekannt']];    // Define an array and assign columns for the chart.
+
+                data = data['9564']
 
                 // Loop through each data and populate the array.
                 $.each(data, function (index, value) {
-                    arrSales.push([value.Month, value.g1, value.g2, value.g3, value.g4, value.g5, value.g6]);
+                    dataSeries.push(
+                        [value.date, 
+                         value['A00-A04'], 
+                         value['A05-A14'], 
+                         value['A15-A34'], 
+                         value['A35-A59'], 
+                         value['A60-A79'], 
+                         value['A80+'],
+                         value['unknown']
+                        ]);
                 });
 
                 // Set chart Options.
                 var options = {
                     chart: {
                         title: 'Monthly Cases',
-                        subtitle: '-- grouped by age group'
+                        subtitle: '-- grouped by age group',
                     },
                     axes: {
                         x: {
@@ -43,7 +54,7 @@
                 };
 
                 // Create DataTable and add the array to it.
-                var figures = google.visualization.arrayToDataTable(arrSales)
+                var figures = google.visualization.arrayToDataTable(dataSeries)
 
                 // Define the chart type (LineChart) and the container (a DIV in our case).
                 var chart = new google.charts.Line(document.getElementById('chart'))
