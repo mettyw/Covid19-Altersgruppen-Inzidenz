@@ -37,6 +37,5 @@ jobs:
         uses: EndBug/add-and-commit@v7.2.0
         with:
            author_name: UpdateBot
-           author_email: TODO
            message: "Updated rki dataset"
            add: 'assets/data/*'
