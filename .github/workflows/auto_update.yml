@@ -6,7 +6,8 @@ name: auto_update
 on:
   # auto update
   schedule:
-  - cron: "0 10 * * *" # Runs at 10:00 UTC every day. 
+    - cron: "0 10 * * *" 
+# Runs at 10:00 UTC every day. 
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
