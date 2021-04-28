@@ -30,31 +30,34 @@ with open("../data/population_landkreise.json") as json_file:
 pop_rki_aligned["unbekannt"] = pop_rki_aligned.sum(axis=1) * 0.01  # 1% not known
 
 
-""" # Create data dict
+
+""" # Create Landkreis data
+"""
+
+data_lks = rki.data
+data_lks = data_lks[["IdLandkreis", "Landkreis"]].drop_duplicates(["IdLandkreis", "Landkreis"])
+#display(data_lks)
+
+landkreis_data = {}
+for row in data_lks.itertuples():
+    landkreis_data[row.IdLandkreis] = row.Landkreis
+#display(landkreis_data)
+
+
+""" # Create Incidence data 7 day rolling window
 """
 
 ags = ["A00-A04", "A05-A14", "A15-A34", "A35-A59", "A60-A79", "A80+", "unknown"]
 
-
-# 09564 Nürnberg
-#rki.
-#df.loc[label]
-
-# New cases with rolling 7 day sum:
 data_rki = rki.data
-datemax = rki.data["date"].max()
+#display(data_rki)
+
 index = pd.date_range(rki.data["date"].min(), rki.data["date"].max())
 
 data_rki = data_rki.set_index(["IdLandkreis", "Altersgruppe", "date",])
 data_rki = data_rki.groupby(["IdLandkreis", "Altersgruppe", "date",]).sum()["confirmed"]
-#display(data_rki)
 
-#display(data_rki)
-
-#for lk_id in data_rki.index.get_level_values(level="IdLandkreis").unique():
-#    print(lk_id)
-
-# rolling window
+# rolling window 7 day sum:
 
 data_rki = data_rki.groupby(level=[0, 1]).apply(
     lambda x: x.reset_index(level=[0, 1], drop=True).reindex(index)
@@ -66,18 +69,14 @@ data_rki = data_rki.fillna(0)
 cases_7_day_sum = data_rki.rolling(7).sum()
 cases_7_day_sum = cases_7_day_sum.fillna(0)
 
-#lk_id = 9564
-#cases_7_day_sum = cases_7_day_sum.xs(lk_id, level="IdLandkreis")
-
-data = {}
+incidence_data = {}
 
 for lk_id in cases_7_day_sum.index.get_level_values(level="IdLandkreis").unique():
     data_lk = cases_7_day_sum.xs(lk_id, level="IdLandkreis")
-    data[lk_id] = []
+
+    incidence_data[lk_id] = []
     print(f"processing landkreis {lk_id}")
 
-    #data = []
-    #for idx in index:
     for idx in data_lk.index.get_level_values(level="date").unique():
         cases_at_date = data_lk.xs(idx, level="date")
     
@@ -86,19 +85,21 @@ for lk_id in cases_7_day_sum.index.get_level_values(level="IdLandkreis").unique(
         row["date"] = handle
         for ag in ags:
             try:
-                #if lk_id == 9564 and idx == datemax:
-                #    display(cases_at_date[ag])
-
-                # TODO round floats for json
-                row[ag] = (cases_at_date[ag]
+                # round and only store as integer to save JSON file size
+                row[ag] = int(cases_at_date[ag]
                     * 100000
                     / pop_rki_aligned[ag].xs(lk_id, level="ags").values[0]
+                    + 0.5 # gives nearest rounded-up integer
                 )
             except:
                 row[ag] = 0
-        data[lk_id].append(row)
+        incidence_data[lk_id].append(row)
+
+output = {}
+output['incidence'] = incidence_data
+output['landkreise'] = landkreis_data
 
 #display(data)
 print("writing data")
 with open("../data/data_latest.json", "w") as outfile:
-    ujson.dump(data, outfile)
+    ujson.dump(output, outfile)
