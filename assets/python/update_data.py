@@ -39,10 +39,9 @@ data_lks = data_lks[["IdLandkreis", "Landkreis"]].drop_duplicates(["IdLandkreis"
 #display(data_lks)
 
 landkreis_data = {}
-for row in data_lks.itertuples():
+for row in data_lks.sort_values(by=['Landkreis']).itertuples():
     landkreis_data[row.IdLandkreis] = row.Landkreis
 #display(landkreis_data)
-
 
 """ # Create Incidence data 7 day rolling window
 """

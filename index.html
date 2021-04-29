@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,60 +8,65 @@
     <title>Zeitreihe Inzidenz pro Altersgruppe</title>
     <meta content="" name="description">
     <meta content="COVID-19, CORONA, DEUTSCHLAND, ALTERSGRUPPEN, INZIDENZ, LANDKREIS" name="keywords">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="-1">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+        crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  
+
     <!-- Bootstrap CSS -->
     <!-- <link href="assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
-  
+
     <!-- Master CSS -->
     <link href="assets/css/main.css" rel="stylesheet">
-  
+
 </head>
 
 <body>
-    <h1>Zeitreihe Inzidenz pro Altersgruppe</h1>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
- 
-    <div id="controls">
-        <label for="landkreiseOptions" class="form-label">Landkreis</label>
-        <select id="landkreiseOptions" class="form-select" aria-label="Default select example"
-          onChange="landkreisSelected(this);"
-          >
-            <option selected>(bitte ausw&auml;len)</option>
-          </select>
-<!--
-          <label for="landkreise" class="form-label">Landkreis</label>
-          <input class="form-control" list="landkreiseOptions" id="landkreise" placeholder="Type to search...">
-          <datalist id="landkreiseOptions">
-            <option value="San Francisco">
-            <option value="New York">
-            <option value="Seattle">
-            <option value="Los Angeles">
-            <option value="Chicago">
-          </datalist>  
-          -->
+    <div class="container-fluid ">
+        <div class="row d-flex flex-column vh-100">
+            <div class="card mt-2 mx-2">
+                <div class="card-body">
+                    <div class="float-left">
+                        <h4 class="card-title ">7-Tage-Inzidenz pro Altersgruppe</h4>
+                        <h6 class="card-subtitle mb-2 text-muted">Zeitreihe des gewählten Landkreises</h6>
+                    </div>
+                    <div class="btn-toolbar float-right mb-2 mb-md-0">
+                        <select id="landkreiseOptions" class="form-select btn btn-primary"
+                            onChange="landkreisSelected(this);">
+                            <option selected>(bitte wählen)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-1 mb-2 mx-2 flex-fill flex-grow-1">
+                <div class="card-body">
+                    <div id="chart" class="h-100"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="chart"></div> 
 </body>
 
 <script>
 
-// Visualization API with the Line chart package.
+    // Visualization API with the Line chart package.
     google.charts.load('current', { packages: ['line'] });
     google.charts.setOnLoadCallback(loadData);
-    
+
     var mydata;
 
     function landkreisSelected(sel) {
         var lk_id = sel.options[sel.selectedIndex].value;
-       // alert(lk_id);
+        // alert(lk_id);
         drawChart(lk_id);
     }
     function loadData() {
@@ -72,53 +78,56 @@
             success: function (data) {
                 mydata = data
 
-                $.each(data['landkreise'], function(key, value) {
-                    $('#landkreiseOptions').append($('<option>').text(value).attr('value', key));
+                $.each(data['landkreise'], function (key, value) {
+                    //console.log( key + ": " + value );
+                    $('#landkreiseOptions').append($('<option>').text(key+" - "+value).attr('value', key));
                 });
-
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert('Got an Error');
+                alert('Got an Error: ' + errorThrown);
             }
         });
     }
 
     function drawChart(lk_id) {
-                var dataSeries = [['date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+', 'unbekannt']];    // Define an array and assign columns for the chart.
+        var dataSeries = [['date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+', 'unbekannt']];    // assign columns for the chart.
 
-                //data = data['incidence']['9564']
+        //data = data['incidence']['9564']
 
-                // Loop through each data and populate the array.
-                $.each(mydata['incidence'][lk_id], function (index, value) {
-                    dataSeries.push(
-                        [
-                         value.date, 
-                         value['A00-A04'], 
-                         value['A05-A14'], 
-                         value['A15-A34'], 
-                         value['A35-A59'], 
-                         value['A60-A79'], 
-                         value['A80+'],
-                         value['unknown']
-                        ]);
-                });
+        // Loop through each data and populate the array.
+        $.each(mydata['incidence'][lk_id], function (index, value) {
+            dataSeries.push(
+                [
+                    value.date,
+                    value['A00-A04'],
+                    value['A05-A14'],
+                    value['A15-A34'],
+                    value['A35-A59'],
+                    value['A60-A79'],
+                    value['A80+'],
+                    value['unknown']
+                ]);
+        });
 
-                // Set chart Options.
-                var options = {
-                    chart: {
-                        title: 'Monthly Cases',
-                        subtitle: '-- grouped by age group',
-                    },
+        // Set chart Options.
+        var options = {
 
-                };
-                // Create DataTable and add the array to it.
-                var data = google.visualization.arrayToDataTable(dataSeries)
-
-                // Define the chart type (LineChart) and the container (a DIV in our case).
-                var chart = new google.charts.Line(document.getElementById('chart'))
-
-                // Draw the chart with Options.
-                chart.draw(data, google.charts.Line.convertOptions(options));                
+            //   title: 'Zeitreihe Inzidenz ' + mydata['landkreise'][lk_id],
+            //   subtitle: '(aufgeschlüsselt nach Altersgruppe)',
+            //legend: { position: 'none', },
+            hAxis: {
+                "title": ""
             }
+        };
+        // Create DataTable and add the array to it.
+        var data = google.visualization.arrayToDataTable(dataSeries)
+
+        // Define the chart type (LineChart) and the container (a DIV in our case).
+        var chart = new google.charts.Line(document.getElementById('chart'))
+
+        // Draw the chart with Options.
+        chart.draw(data, google.charts.Line.convertOptions(options));
+    }
 </script>
+
 </html>
