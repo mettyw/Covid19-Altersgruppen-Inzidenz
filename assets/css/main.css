@@ -2,16 +2,26 @@
 * @Author: Matthias Wetzka
 */
 
+:root {
+	--color-chart-1: #f44336;
+	--color-chart-2: #9C27B0;
+	--color-chart-3: #3F51B5;
+	--color-chart-4: #00BCD4;
+	--color-chart-5: #4CAF50;
+	--color-chart-6: #CDDC39;
+	--color-chart-7: #FF9800;
+	--color-chart-8: #E91E63;
+}
+
 body {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
 	font-size: 12px;
-	background: #888;
+	background: #ccc;
 
     width: 100%;
 	margin: 0%;    
 }
 
 #chart {
-	hheight:90vh;
 }
 

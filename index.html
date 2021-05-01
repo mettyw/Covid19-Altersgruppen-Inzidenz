@@ -18,6 +18,9 @@
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+
     <!-- Bootstrap CSS -->
     <!-- <link href="assets/css/bootstrap/bootstrap.min.css" rel="stylesheet">-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
@@ -31,8 +34,8 @@
 
 <body>
     <div class="container-fluid ">
-        <div class="row d-flex flex-column vh-100">
-            <div class="card mt-2 mx-2 w-auto">
+        <div class="row">
+            <div class="card mt-2 mx-1 w-100">
                 <div class="card-body">
                     <div class="float-left">
                         <h4 class="card-title ">7-Tage-Inzidenz pro Altersgruppe</h4>
@@ -46,13 +49,68 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card mt-1 mb-2 mx-2 flex-fill flex-grow-1">
+        </div>
+        <div class="row d-flex">
+            <div class="card mt-1 mb-1 mx-1">
                 <div class="card-body">
-                    <div id="chart" class="h-100"></div>
+                    <h6 class="card-title ">Aktuelle Werte</h4>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col" >Altersgruppe</th>
+                                    <th scope="col">7-Tage-Inzidenz</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-1);">A00-A04</th>
+                                    <td id="aktuell_A00-A04">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-2);">A05-A14</th>
+                                    <td id="aktuell_A05-A14">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-3);">A15-A34</th>
+                                    <td id="aktuell_A15-A34">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-4);">A35-A59</th>
+                                    <td id="aktuell_A35-A59">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-5);">A60-A79</th>
+                                    <td id="aktuell_A60-A79">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-6);">A80+</th>
+                                    <td id="aktuell_A80">0</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" style="color: var(--color-chart-7);">unbekannt</th>
+                                    <td id="aktuell_unknown">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+            <div class="card mt-1 mb-1 mx-1 flex-grow-1">
+                <div class="card-body">
+                    <h6 class="card-title ">Zeitreihe</h4>
+                        <div id="chart2" class="w-auto"></div>
                 </div>
             </div>
         </div>
+        <!--
+        <div class="row">
+            <div class="card mt-1 mb-2 mx-1 w-100 ">
+                <div class="card-body">
+                    <h6 class="card-title ">Zeitreihe</h4>
+                    <div id="chart" class="mh-100" style="height:90vh;"></div>
+                </div>
+            </div>
+        </div>
+        -->
     </div>
 </body>
 
@@ -64,10 +122,22 @@
 
     var mydata;
 
+    function last(array) {
+        return array[array.length - 1];
+    }
+
     function landkreisSelected(sel) {
         var lk_id = sel.options[sel.selectedIndex].value;
-        // alert(lk_id);
-        drawChart(lk_id);
+        Cookies.set('lk_id', lk_id);
+        drawChart2(lk_id);
+
+        $('#aktuell_A00-A04').html(last(mydata['incidence'][lk_id])['A00-A04']);
+        $('#aktuell_A05-A14').html(last(mydata['incidence'][lk_id])['A05-A14']);
+        $('#aktuell_A15-A34').html(last(mydata['incidence'][lk_id])['A15-A34']);
+        $('#aktuell_A35-A59').html(last(mydata['incidence'][lk_id])['A35-A59']);
+        $('#aktuell_A60-A79').html(last(mydata['incidence'][lk_id])['A60-A79']);
+        $('#aktuell_A80').html(last(mydata['incidence'][lk_id])['A80+']);
+        $('#aktuell_unknown').html(last(mydata['incidence'][lk_id])['unknown']);
     }
     function loadData() {
         $.ajax({
@@ -80,8 +150,15 @@
 
                 $.each(data['landkreise'], function (key, value) {
                     //console.log( key + ": " + value );
-                    $('#landkreiseOptions').append($('<option>').text(key+" - "+value).attr('value', key));
+                    $('#landkreiseOptions').append($('<option>').text(key + " - " + value).attr('value', key));
                 });
+
+                var lk_id = Cookies.get('lk_id');
+                if (lk_id != undefined) {
+                    $('#landkreiseOptions option[value=' + lk_id + ']').attr('selected', 'selected');
+
+                    drawChart2(lk_id);
+                }
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 alert('Got an Error: ' + errorThrown);
@@ -117,13 +194,67 @@
             //legend: { position: 'none', },
             hAxis: {
                 "title": ""
-            }
+            },
         };
         // Create DataTable and add the array to it.
         var data = google.visualization.arrayToDataTable(dataSeries)
 
         // Define the chart type (LineChart) and the container (a DIV in our case).
         var chart = new google.charts.Line(document.getElementById('chart'))
+
+        // Draw the chart with Options.
+        chart.draw(data, google.charts.Line.convertOptions(options));
+    }
+
+
+    function drawChart2(lk_id) {
+        var dataSeries = [['date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+', 'unbekannt']];    // assign columns for the chart.
+
+        var data = mydata['incidence'][lk_id];
+        var data_start_index = data.length - 30;
+        // Loop through each data and populate the array.
+        $.each(data, function (index, value) {
+            if (index < data_start_index) return;
+            dataSeries.push(
+                [
+                    value.date,
+                    value['A00-A04'],
+                    value['A05-A14'],
+                    value['A15-A34'],
+                    value['A35-A59'],
+                    value['A60-A79'],
+                    value['A80+'],
+                    value['unknown']
+                ]);
+        });
+
+        // Set chart Options.
+        var options = {
+
+            //   title: 'Zeitreihe Inzidenz ' + mydata['landkreise'][lk_id],
+            //   subtitle: '(aufgeschlüsselt nach Altersgruppe)',
+            legend: { position: 'none', },
+            hAxis: {
+                "title": ""
+            },
+            colors: [
+                '#f44336',
+                '#9C27B0',
+                '#3F51B5',
+                '#00BCD4',
+                '#4CAF50',
+                '#CDDC39',
+                '#CDDC39',
+                '#FF9800',
+                '#E91E63',]
+
+
+        };
+        // Create DataTable and add the array to it.
+        var data = google.visualization.arrayToDataTable(dataSeries)
+
+        // Define the chart type (LineChart) and the container (a DIV in our case).
+        var chart = new google.charts.Line(document.getElementById('chart2'))
 
         // Draw the chart with Options.
         chart.draw(data, google.charts.Line.convertOptions(options));
