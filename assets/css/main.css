@@ -16,10 +16,20 @@
 body {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
 	font-size: 12px;
-	background: #ccc;
+	background: #fff;
 
     width: 100%;
 	margin: 0%;    
+}
+
+#chartcontainer {
+	width: 100vw;
+	flex-grow: unset;
+}
+@media (min-width: 768px) {
+	#chartcontainer {
+		flex-grow: 1;
+		width: auto;
 }
 
 #chart {
