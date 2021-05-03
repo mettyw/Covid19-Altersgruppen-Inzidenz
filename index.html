@@ -90,7 +90,7 @@
                     </table>
             </div>
             <div id="chartcontainer">
-                <h6>Zeitreihe der letzten 30 Tage</h6>
+                <h6>Zeitreihe der letzten 60 Tage</h6>
                 <div id="chart2" class="w-100"></div>
             </div>
         </div>
@@ -154,6 +154,8 @@
             return;
         }
         $('#landkreiseOptions option[value=' + lk_id + ']').attr('selected', 'selected');
+        // need to call refresh to tell selectpicker that we changed selection
+        $('#landkreiseOptions').selectpicker('refresh');
 
         drawChart2();
 
@@ -196,7 +198,7 @@
         var dataSeries = [['date', 'A00-A04', 'A05-A14', 'A15-A34', 'A35-A59', 'A60-A79', 'A80+', 'unbekannt']];    // assign columns for the chart.
 
         var data = mydata['incidence'][lk_id];
-        var data_start_index = data.length - 30;
+        var data_start_index = data.length - 60;
         // Loop through each data and populate the array.
         $.each(data, function (index, value) {
             if (index < data_start_index) return;
@@ -222,6 +224,7 @@
             hAxis: {
                 "title": ""
             },
+
             colors: [
                 '#f44336',
                 '#9C27B0',
